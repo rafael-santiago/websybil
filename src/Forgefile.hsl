@@ -1,0 +1,33 @@
+include ~/toolsets/gcc/gcc-app.hsl
+include ~/toolsets/common/utils/lang/c/dependency_scanner.hsl
+
+var srcs type list;
+var incs type list;
+var cflags type list;
+var libs type list;
+var ldflags type list;
+
+var deps type string;
+
+project websybil : toolset "gcc-c-app" : dependencies $deps : $srcs, $incs, $cflags, $libs, $ldflags, "websybil";
+
+websybil.prologue() {
+    $deps = get_c_cpp_deps();
+    $srcs.ls(".*\\.c$");
+}
+
+websybil.epilogue() {
+    if (hefesto.sys.last_forge_result() == 0) {
+        if (hefesto.sys.cd("test") == 0) {
+            hefesto.sys.echo("ERROR: unit test directory not found. Aborted.\n");
+            hefesto.project.abort(1);
+        }
+        hefesto.sys.forge("websybil-unit-test",
+                          "Forgefile.hsl",
+                          "--bin-output-dir=bin --obj-output-dir=o");
+        hefesto.sys.cd("..");
+        if (hefesto.sys.last_forge_result() != 0) {
+            hefesto.project.abort(1);
+        }
+    }
+}

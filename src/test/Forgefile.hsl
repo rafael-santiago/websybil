@@ -1,0 +1,60 @@
+include ~/toolsets/gcc/gcc-app.hsl
+
+var srcs type list;
+var incs type list;
+var cflags type list;
+var libs type list;
+var ldflags type list;
+
+project websybil-unit-test : toolset "gcc-c-app" : $srcs, $incs, $cflags, $libs, $ldflags, "websybil-unit";
+
+function get_websybil_objs() : result type list {
+    var retval type list;
+    var oldcwd type string;
+    $oldcwd = hefesto.sys.pwd();
+    hefesto.sys.cd("../o/");
+    $retval.ls(".*\\.o$");
+    var r type int;
+    $r = 0;
+    while ($r < $retval.count()) {
+        var item type string;
+        $item = $retval.item($r);
+        if ($item.match("main\\.o$")) {
+            $retval.del_index($r);
+            break;
+        }
+        $r = $r + 1;
+    }
+    hefesto.sys.cd($oldcwd);
+    result $retval;
+}
+
+websybil-unit-test.prologue() {
+    $srcs.ls(".*\\.c$");
+    $incs.add_item("cutest/src");
+    $libs.add_item("cutest/src/lib");
+    $ldflags = get_websybil_objs();
+    $ldflags.add_item("-lcutest");
+    if (hefesto.sys.os_name() == "linux") {
+        $ldflags.add_item("-ldl");
+    }
+    if (hefesto.sys.cd("cutest/src/")) {
+        if (hefesto.sys.run("hefesto") != 0) {
+            hefesto.project.abort(1);
+        }
+        hefesto.sys.cd("../..");
+    } else {
+        hefesto.sys.echo("ERROR: unable to forge libcutest. Aborted.\n");
+        hefesto.project.abort(1);
+    }
+}
+
+websybil-unit-test.epilogue() {
+    if (hefesto.sys.last_forge_result() == 0) {
+        var exit_code type int;
+        $exit_code = hefesto.sys.run("bin/websybil-unit");
+        if ($exit_code != 0) {
+            hefesto.project.abort($exit_code);
+        }
+    }
+}
