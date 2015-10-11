@@ -5,8 +5,9 @@
  * the terms of the GNU General Public License version 2.
  *
  */
-#include "http_parser.h"
+#ifndef WEBSYBIL_VAPOUR_H
+#define WEBSYBIL_VAPOUR_H 1
 
-int main(int argc, char **argv) {
-    return 0;
-}
+const char *get_websybil_browser_prediction(const char *request);
+
+#endif

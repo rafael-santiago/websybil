@@ -10,7 +10,7 @@ typedef enum {
     kAcceptEncoding,
     kReferer,
     kConnection,
-    kMaxHttpFields
+    kMaxHttpFields = kConnection
 }websybil_http_fields_t;
 
 typedef int *websybil_http_fields_vect_t;
