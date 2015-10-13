@@ -19,6 +19,8 @@ typedef int *websybil_http_fields_vect_t;
 
 #define WEBSYBIL_BANNER "websybil 0.0.1"
 
+#define WEBSYBIL_FROM_WIRE_RESULT_MESSAGE "The host %s seems to be using %s.\n"
+
 #ifdef WEBSYBIL_LINUX
 
 #define WEBSYBIL_FROM_WIRE_USAGE_BANNER "|--from-wire=<iface-name>"

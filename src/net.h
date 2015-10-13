@@ -12,4 +12,6 @@ int new_raw_socket(const char *iface);
 
 void del_raw_socket(int socket, const char *iface);
 
+char *get_src_addr_from_pkt(const char *pkt, const int pkt_size);
+
 #endif

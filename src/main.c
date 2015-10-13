@@ -44,14 +44,32 @@ void sigint_watchdog(int sign) {
 
 int get_data_from_stdin() {
     FILE *stdpipe = fopen("/dev/stdin", "rb");
+    char byte[0x2] = "";
     char inbuf[0xffff] = "";
+    int c = 0;
     if (stdpipe == NULL) {
         printf("ERROR: unable to read data from \"/dev/stdin\".\n");
         return 1;
     }
     while (!g_should_abort) {
         memset(inbuf, 0, sizeof(inbuf));
-        if (fgets(inbuf, sizeof(inbuf), stdpipe) != NULL) {
+        memset(byte, 0, sizeof(byte));
+        byte[0] = fgetc(stdpipe);
+        c = 0;
+        while (!feof(stdpipe) && c < 2) {
+            strncat(inbuf, byte, sizeof(inbuf) - 1);
+            byte[0] = fgetc(stdpipe);
+            c = 0;
+            while (byte[0] == '\n' || byte[1] == '\r' && c < 2) {
+                strncat(inbuf, byte, sizeof(inbuf) - 1);
+                byte[0] = fgetc(stdpipe);
+                c++;
+            }
+            if (c == 2) {
+                fseek(stdpipe, ftell(stdpipe) - 1, SEEK_SET);
+            }
+        }
+        if (inbuf[0] != 0) {
             printf(WEBSYBIL_RESULT_MESSAGE, get_websybil_browser_prediction(inbuf));
         }
         usleep(10);
@@ -66,7 +84,7 @@ int get_data_from_stdin() {
 int get_data_from_wire(const char *iface) {
     int sockfd = new_raw_socket(iface);
     unsigned char buf[0xffff];
-    char *get_req = NULL;
+    char *get_req = NULL, *src_addr = NULL;
     int buf_size = 0;
     if (sockfd == -1) {
         printf("ERROR: on raw socket creation.\n");
@@ -76,8 +94,12 @@ int get_data_from_wire(const char *iface) {
         buf_size = recvfrom(sockfd, buf, sizeof(buf), NULL, NULL);
         if (buf_size > 0) {
             get_req = parse_http_request_from_wire(buf, buf_size);
+            src_addr = get_src_addr_from_pkt(buf, buf_size);
             if (get_req != NULL) {
-                printf(WEBSYBIL_RESULT_MESSAGE, get_websybil_browser_prediction(get_req));
+                printf(WEBSYBIL_FROM_WIRE_RESULT_MESSAGE, src_addr, get_websybil_browser_prediction(get_req));
+                if (src_addr != NULL) {
+                    free(src_addr);
+                }
                 free(get_req);
             }
         }
