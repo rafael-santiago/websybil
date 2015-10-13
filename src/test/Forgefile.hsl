@@ -42,6 +42,7 @@ websybil-unit-test.prologue() {
     $libs.add_item("cutest/src/lib");
     $ldflags = get_websybil_objs();
     $ldflags.add_item("-lcutest");
+    $cflags = hefesto.sys.get_option("cflags");
     if (hefesto.sys.os_name() == "linux") {
         $ldflags.add_item("-ldl");
     }

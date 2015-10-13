@@ -12,4 +12,6 @@
 
 websybil_http_fields_vect_t get_http_request_signature(const char *request);
 
+char *parse_http_request_from_wire(const unsigned char *buf, const int buf_size);
+
 #endif

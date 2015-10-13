@@ -19,8 +19,34 @@ var deps type string;
 project websybil : toolset "gcc-c-app" : dependencies $deps : $srcs, $incs, $cflags, $libs, $ldflags, "websybil";
 
 websybil.prologue() {
+
+    #  INFO(Santiago): Platform independent codes.
+
     $deps = get_c_cpp_deps();
     $srcs.ls(".*\\.c$");
+
+    #  INFO(Santiago): From wire feature's native codes (if it is supported on current platform).
+
+    var has_from_wire type list;
+    var platform_from_wire_cflag type list;
+
+    $has_from_wire.add_item("linux");
+    $platform_from_wire_cflag.add_item("WEBSYBIL_LINUX");
+
+    var current_os type string;
+    $current_os = hefesto.sys.os_name();
+
+    if ($has_from_wire.index_of($current_os) > -1) {
+        if (hefesto.sys.cd($current_os) == 0) {
+            hefesto.sys.echo("PANIC: native code for \"" + $current_os + "\" not found. Aborted.\n");
+            hefesto.project.abort(1);
+        }
+        $deps = $deps + get_c_cpp_deps();
+        $srcs.ls(".*\\.c$");
+        $cflags.add_item("-D" + $platform_from_wire_cflag.item($has_from_wire.index_of($current_os)));
+        hefesto.sys.cd("..");
+    }
+
 }
 
 websybil.epilogue() {
@@ -29,9 +55,13 @@ websybil.epilogue() {
             hefesto.sys.echo("ERROR: unit test directory not found. Aborted.\n");
             hefesto.project.abort(1);
         }
+        var cflags type string;
+        if (hefesto.sys.os_name() == "linux") {
+            $cflags = "-DWEBSYBIL_LINUX";
+        }
         hefesto.sys.forge("websybil-unit-test",
                           "Forgefile.hsl",
-                          "--bin-output-dir=bin --obj-output-dir=o");
+                          "--bin-output-dir=bin --obj-output-dir=o --cflags=" + $cflags);
         hefesto.sys.cd("..");
         if (hefesto.sys.last_forge_result() != 0) {
             hefesto.project.abort(1);

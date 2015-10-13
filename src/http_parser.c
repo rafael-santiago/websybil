@@ -88,3 +88,50 @@ websybil_http_fields_vect_t get_http_request_signature(const char *request) {
     return retval;
 }
 
+char *parse_http_request_from_wire(const unsigned char *buf, const int buf_size) {
+    const unsigned char *datagram = NULL;
+    const unsigned char *tcp_chunk = NULL;
+    const unsigned char *tcp_payload = NULL;
+    const unsigned char *buf_end = NULL;
+    char *retval = NULL;
+    int data_offset = 0;
+    if (buf_size <= 14) {
+        return NULL;
+    }
+    if (*(buf + 12) != 0x08 || *(buf + 13) != 0x00) {
+        return NULL;
+    }
+    datagram = buf + 14;
+    switch (((*datagram) & 0xf0) >> 4) {
+        case 0x4:
+            if (*(datagram + 9) != 0x6) {
+                return NULL;
+            }
+            tcp_chunk = datagram + (((*datagram) & 0x0f) * 4);
+            break;
+
+        case 0x6:
+            if (*(datagram + 6) != 0x6) {
+                return NULL;
+            }
+            tcp_chunk = datagram + 40;
+            break;
+
+        default:
+            return NULL;
+    }
+    data_offset = 4 * ((*(tcp_chunk + 12) & 0xf0) >> 4);
+    if (data_offset >= buf_size) {
+        return NULL;
+    }
+    tcp_payload = tcp_chunk + data_offset;
+    if (tcp_payload != NULL && (strstr(tcp_payload, "GET /") == (char *)tcp_payload  ||
+                                strstr(tcp_payload, "HEAD /") == (char *)tcp_payload ||
+                                strstr(tcp_payload, "POST /") == (char *)tcp_payload)) {
+        buf_end = buf + buf_size;
+        retval = (char *) malloc(buf_end - tcp_payload + 1);
+        memset(retval, 0, buf_end - tcp_payload + 1);
+        memcpy(retval, tcp_payload, buf_end - tcp_payload);
+    }
+    return retval;
+}
