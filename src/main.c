@@ -181,7 +181,7 @@ int main(int argc, char **argv) {
         return 1;
     }
     prediction_rate = get_option("prediction-rate", argv, argc);
-    option = get_option("vapour-dump", argv, argc);
+    option = get_option("vapour-pipe", argv, argc);
     if (option != NULL) {
         vapour = ld_vapour_from(option, &vapour_size);
     }

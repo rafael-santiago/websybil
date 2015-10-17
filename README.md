@@ -24,7 +24,7 @@ With ``Hefesto`` working on your system inside ``Websybil`` src directory just t
 
 ``hefesto``
 
-An ``ELF`` under src/bin will be created. Congrats, now you have "websybil" ready for browser predictions on your system.
+An ``ELF`` under src/bin will be created. Congrats, now you have "sybil" ready for browser predictions on your system. :-P
 
 # How to use this?
 
@@ -53,3 +53,20 @@ Just put the ``websybil`` at the end of your pipe chain.
 ``(...) | ./websybil``
 
 Send a ``SIGINT`` to stop the application (``CTRL+c``).
+
+## Additional options
+
+If you want to see more information about the predictions try to use this additional option: ``--prediction-rate``.
+
+You can configure by your own the signatures of the known browsers using a text file. The syntax is pretty simple:
+
+        # Scheme: <BrowserNameWithNoSpaces>\s<Http Field List>
+        #
+        #  Http Fields: "Host", "User-Agent", "Accept", "Accept-Language",
+        #               "Accept-Encoding", "Connection" and "None" (for null field cases).
+        #
+        IE      Accept,Accept-Language,User-Agent,Accept-Encoding,Host,Connection
+        Firefox Host,User-Agent,Accept,Accept-Language,Accept-Encoding,Connection
+        Chrome  Host,Connection,Accept,User-Agent,Accept-Encoding,Accept-Language
+
+Supposing that the data above is inside a file named ``amsterdam.txt``. Just use this additional option ``--vapour-pipe=amsterdam.txt``.
