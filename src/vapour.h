@@ -8,6 +8,20 @@
 #ifndef WEBSYBIL_VAPOUR_H
 #define WEBSYBIL_VAPOUR_H 1
 
-const char *get_websybil_browser_prediction(const char *request);
+#include "types.h"
+#include <stdlib.h>
+
+struct websybil_known_browsers {
+    char *name;
+    unsigned char sig[kMaxHttpFields];
+};
+
+const char *get_websybil_browser_prediction(const char *request, struct websybil_known_browsers *vp, size_t vp_size, int *matching_total);
+
+struct websybil_known_browsers *ld_vapour_from(const char *filepath, size_t *items_total);
+
+void free_vapour_ctx(struct websybil_known_browsers *vp, const size_t items_total);
+
+float get_websybil_success_rate(const int matching_total);
 
 #endif

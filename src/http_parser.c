@@ -33,9 +33,6 @@ static websybil_http_fields_t get_http_field_index(const char *request) {
     if (strstr(request, "accept-encoding:") == request) {
         return kAcceptEncoding;
     }
-    if (strstr(request, "referer:") == request) {
-        return kReferer;
-    }
     if (strstr(request, "connection:") == request) {
         return kConnection;
     }
@@ -80,7 +77,10 @@ websybil_http_fields_vect_t get_http_request_signature(const char *request) {
         for (; *wp != 0 && f < kMaxHttpFields; wp++) {
             if (*wp == '\n') {
                 wp++;
-                retval[f++] = get_http_field_index(wp);
+                retval[f] = get_http_field_index(wp);
+                if (retval[f] != kNone) {
+                    f++;
+                }
             }
         }
     }

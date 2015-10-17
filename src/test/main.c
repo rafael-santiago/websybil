@@ -26,7 +26,6 @@ CUTE_TEST_CASE(http_parsing_tests)
                                                         kAccept,
                                                         kAcceptLanguage,
                                                         kAcceptEncoding,
-                                                        kReferer,
                                                         kConnection };
     size_t f = 0;
     CUTE_ASSERT(rsig != NULL);
@@ -72,7 +71,7 @@ CUTE_TEST_CASE(vapour_tests)
     const char *browser = NULL;
     static char msg[1024] = "";
     for (t = 0; t < test_data_size; t++) {
-        browser = get_websybil_browser_prediction(data[t].get_req);
+        browser = get_websybil_browser_prediction(data[t].get_req, NULL, 0, NULL);
         CUTE_ASSERT(browser != NULL);
         CUTE_ASSERT(strcmp(browser, "(unk)") != 0);
         sprintf(msg, "strcmp(browser, \"%s\") != 0 [browser = \"%s\"]", data[t].browser, browser);
