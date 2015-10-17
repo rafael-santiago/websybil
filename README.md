@@ -56,7 +56,9 @@ Send a ``SIGINT`` to stop the application (``CTRL+c``).
 
 ## Additional options
 
-If you want to see more information about the predictions try to use this additional option: ``--prediction-rate``.
+If you want to see more information about the predictions try to use this additional option:
+
+``--prediction-rate``
 
 You can configure by your own the signatures of the known browsers using a text file. The syntax is pretty simple:
 
@@ -69,4 +71,6 @@ You can configure by your own the signatures of the known browsers using a text 
         Firefox Host,User-Agent,Accept,Accept-Language,Accept-Encoding,Connection
         Chrome  Host,Connection,Accept,User-Agent,Accept-Encoding,Accept-Language
 
-Supposing that the data above is inside a file named ``amsterdam.txt``. Just use this additional option ``--vapour-pipe=amsterdam.txt``.
+Supposing that the data above is inside a file named ``amsterdam.txt``. Just use this additional option:
+
+``--vapour-pipe=amsterdam.txt``
