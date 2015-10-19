@@ -10,6 +10,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 static struct websybil_known_browsers browser_signature[] = {
     { "Firefox", {kHost,
@@ -41,7 +42,7 @@ static size_t get_vapour_file_item_count(FILE *vp);
 
 #define WEBSYBIL_SIG_TOTAL sizeof(browser_signature) / sizeof(browser_signature[0])
 
-const char *get_websybil_browser_prediction(const char *request, struct websybil_known_browsers *vp, size_t vp_size, int *matching_total) {
+const char *get_websybil_browser_prediction(const char *request, struct websybil_known_browsers *vp, size_t vp_size, int *matching_total, const int threshold) {
     size_t s, matches, f, prior_matches = 0;
     long sig_index = -1;
     struct websybil_known_browsers *vapour = &browser_signature[0];
@@ -68,6 +69,9 @@ const char *get_websybil_browser_prediction(const char *request, struct websybil
     }
     if (matching_total != NULL) {
         *matching_total = prior_matches;
+    }
+    if (threshold > -1 && ceil(get_websybil_success_rate(prior_matches)) < (float)threshold) {
+        sig_index = -1;
     }
     return (sig_index == -1) ? "(unk)" : vapour[sig_index].name;
 }

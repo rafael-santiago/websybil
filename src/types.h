@@ -34,6 +34,6 @@ typedef int *websybil_http_fields_vect_t;
 
 #endif
 
-#define WEBSYBIL_USAGE_BANNER "use: %s --request-buffer=<string-buffer>" WEBSYBIL_FROM_WIRE_USAGE_BANNER
+#define WEBSYBIL_USAGE_BANNER "use: %s --request-buffer=<string-buffer>" WEBSYBIL_FROM_WIRE_USAGE_BANNER" [--prediction-rate --prediction-threshold=<number> --vapour-pipe=<filepath>]"
 
 #endif

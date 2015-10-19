@@ -16,7 +16,19 @@
 
 static int g_should_abort = 0;
 
-char *get_option(const char *option, char **argv, const int argc) {
+static char *get_option(const char *option, char **argv, const int argc);
+
+static void sigint_watchdog(int sign);
+
+static int get_data_from_stdin(struct websybil_known_browsers *vp, size_t vp_size, int *matching_total, const int threshold);
+
+static int get_data_from_wire(const char *iface, struct websybil_known_browsers *vp, size_t vp_size, int *matching_total, const int threshold);
+
+static char *format_request_buffer(const char *request);
+
+static int is_valid_number(const char *number);
+
+static char *get_option(const char *option, char **argv, const int argc) {
     char temp[255];
     int a = 0;
     int t = 0;
@@ -38,11 +50,11 @@ char *get_option(const char *option, char **argv, const int argc) {
     return NULL;
 }
 
-void sigint_watchdog(int sign) {
+static void sigint_watchdog(int sign) {
     g_should_abort = 1;
 }
 
-int get_data_from_stdin(struct websybil_known_browsers *vp, size_t vp_size, int *matching_total) {
+static int get_data_from_stdin(struct websybil_known_browsers *vp, size_t vp_size, int *matching_total, const int threshold) {
     FILE *stdpipe = fopen("/dev/stdin", "rb");
     char byte[0x2] = "";
     char inbuf[0xffff] = "";
@@ -74,7 +86,7 @@ int get_data_from_stdin(struct websybil_known_browsers *vp, size_t vp_size, int 
             }
         }
         if (inbuf[0] != 0) {
-            browser = get_websybil_browser_prediction(inbuf, vp, vp_size, matching_total);
+            browser = get_websybil_browser_prediction(inbuf, vp, vp_size, matching_total, threshold);
             if (matching_total == NULL) {
                 printf(WEBSYBIL_RESULT_MESSAGE, browser);
             } else {
@@ -93,7 +105,7 @@ int get_data_from_stdin(struct websybil_known_browsers *vp, size_t vp_size, int 
 
 #ifdef WEBSYBIL_LINUX
 
-int get_data_from_wire(const char *iface, struct websybil_known_browsers *vp, size_t vp_size, int *matching_total) {
+static int get_data_from_wire(const char *iface, struct websybil_known_browsers *vp, size_t vp_size, int *matching_total, const int threshold) {
     int sockfd = new_raw_socket(iface);
     unsigned char buf[0xffff];
     char *get_req = NULL, *src_addr = NULL;
@@ -109,7 +121,7 @@ int get_data_from_wire(const char *iface, struct websybil_known_browsers *vp, si
             get_req = parse_http_request_from_wire(buf, buf_size);
             src_addr = get_src_addr_from_pkt(buf, buf_size);
             if (get_req != NULL) {
-                browser = get_websybil_browser_prediction(get_req, vp, vp_size, matching_total);
+                browser = get_websybil_browser_prediction(get_req, vp, vp_size, matching_total, threshold);
                 if (matching_total == NULL) {
                     printf(WEBSYBIL_FROM_WIRE_RESULT_MESSAGE, src_addr, browser);
                 } else {
@@ -133,7 +145,7 @@ int get_data_from_wire(const char *iface, struct websybil_known_browsers *vp, si
 
 #endif
 
-char *format_request_buffer(const char *request) {
+static char *format_request_buffer(const char *request) {
     const char *rp = NULL;
     char *retval = NULL, *rtp = NULL;
     if (request == NULL) {
@@ -168,6 +180,19 @@ char *format_request_buffer(const char *request) {
     return retval;
 }
 
+static int is_valid_number(const char *number) {
+    const char *np;
+    if (number == NULL || *number == 0) {
+        return 0;
+    }
+    for (np = number; *np != 0; np++) {
+        if (!isdigit(*np)) {
+            return 0;
+        }
+    }
+    return 1;
+}
+
 int main(int argc, char **argv) {
     size_t vapour_size = 0;
     struct websybil_known_browsers *vapour = NULL;
@@ -175,10 +200,20 @@ int main(int argc, char **argv) {
     int matching_total = 0;
     const char *browser = NULL;
     const char *prediction_rate = NULL;
+    const char *prediction_threshold = NULL;
+    int threshold = -1;
     char *request_buffer = NULL;
     if (get_option("help", argv, argc) != NULL) {
         printf("%s\n%s\n", WEBSYBIL_BANNER, WEBSYBIL_USAGE_BANNER, argv[0]);
         return 1;
+    }
+    prediction_threshold = get_option("prediction-threshold", argv, argc);
+    if (prediction_threshold != NULL) {
+        threshold = atoi(prediction_threshold);
+        if (!is_valid_number(prediction_threshold) || threshold > 100) {
+            printf("ERROR: --prediction-threshold must be a integer number between 0 and 100 inclusive.\n");
+            return 1;
+        }
     }
     prediction_rate = get_option("prediction-rate", argv, argc);
     option = get_option("vapour-pipe", argv, argc);
@@ -194,7 +229,7 @@ int main(int argc, char **argv) {
         }
         browser = get_websybil_browser_prediction(request_buffer,
                                                   vapour, vapour_size,
-                                                  (prediction_rate != NULL) ? &matching_total : NULL);
+                                                  (prediction_rate != NULL) ? &matching_total : NULL, threshold);
         free(request_buffer);
         if (prediction_rate == NULL) {
             printf(WEBSYBIL_RESULT_MESSAGE, browser);
@@ -211,10 +246,10 @@ int main(int argc, char **argv) {
     if (option != NULL) {
         signal(SIGINT, sigint_watchdog);
         signal(SIGTERM, sigint_watchdog);
-        return get_data_from_wire(option, vapour, vapour_size, (prediction_rate != NULL) ? &matching_total : NULL);
+        return get_data_from_wire(option, vapour, vapour_size, (prediction_rate != NULL) ? &matching_total : NULL, threshold);
     }
 #endif
     signal(SIGINT, sigint_watchdog);
     signal(SIGTERM, sigint_watchdog);
-    return get_data_from_stdin(vapour, vapour_size, (prediction_rate != NULL) ? &matching_total : NULL);
+    return get_data_from_stdin(vapour, vapour_size, (prediction_rate != NULL) ? &matching_total : NULL, threshold);
 }

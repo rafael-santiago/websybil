@@ -44,6 +44,7 @@ websybil.prologue() {
         $deps = $deps + get_c_cpp_deps();
         $srcs.ls(".*\\.c$");
         $cflags.add_item("-D" + $platform_from_wire_cflag.item($has_from_wire.index_of($current_os)));
+        $ldflags.add_item("-lm");
         hefesto.sys.cd("..");
     }
 

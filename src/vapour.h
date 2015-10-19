@@ -16,7 +16,7 @@ struct websybil_known_browsers {
     unsigned char sig[kMaxHttpFields];
 };
 
-const char *get_websybil_browser_prediction(const char *request, struct websybil_known_browsers *vp, size_t vp_size, int *matching_total);
+const char *get_websybil_browser_prediction(const char *request, struct websybil_known_browsers *vp, size_t vp_size, int *matching_total, const int threshold);
 
 struct websybil_known_browsers *ld_vapour_from(const char *filepath, size_t *items_total);
 

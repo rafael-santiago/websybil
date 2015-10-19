@@ -74,3 +74,7 @@ You can configure by your own the signatures of the known browsers using a text 
 Supposing that the data above is inside a file named ``amsterdam.txt``. Just use this additional option:
 
 ``--vapour-pipe=amsterdam.txt``
+
+You can state a minimal prediction threshold, for doing it use the option:
+
+``--prediction-threshold=<value>``
