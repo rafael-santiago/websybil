@@ -22,6 +22,8 @@ typedef int *websybil_http_fields_vect_t;
 
 #define WEBSYBIL_FROM_WIRE_RESULT_MESSAGE "The host %s seems to be using %s.\n"
 
+#define WEBSYBIL_FROM_WIRE_RESULT_MESSAGE_WITH_SUCCESS_RATE "The host %s seems to be using %s. (%.f%%)\n"
+
 #ifdef WEBSYBIL_LINUX
 
 #define WEBSYBIL_FROM_WIRE_USAGE_BANNER "|--from-wire=<iface-name>"

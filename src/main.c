@@ -113,7 +113,7 @@ int get_data_from_wire(const char *iface, struct websybil_known_browsers *vp, si
                 if (matching_total == NULL) {
                     printf(WEBSYBIL_FROM_WIRE_RESULT_MESSAGE, src_addr, browser);
                 } else {
-                    printf(WEBSYBIL_RESULT_MESSAGE_WITH_SUCCESS_RATE, browser, get_websybil_success_rate(*matching_total));
+                    printf(WEBSYBIL_FROM_WIRE_RESULT_MESSAGE_WITH_SUCCESS_RATE, src_addr, browser, get_websybil_success_rate(*matching_total));
                 }
                 if (src_addr != NULL) {
                     free(src_addr);
