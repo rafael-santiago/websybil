@@ -62,7 +62,7 @@ websybil.epilogue() {
         }
         hefesto.sys.forge("websybil-unit-test",
                           "Forgefile.hsl",
-                          "--bin-output-dir=bin --obj-output-dir=o --cflags=" + $cflags);
+                          "--bin-output-dir=bin --obj-output-dir=o --cflags=" + $cflags + " --ldflags=-lm");
         hefesto.sys.cd("..");
         if (hefesto.sys.last_forge_result() != 0) {
             hefesto.project.abort(1);

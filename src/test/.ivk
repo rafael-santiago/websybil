@@ -1,2 +1,2 @@
---forgefiles=Forgefile.hsl --Forgefile-projects=websybil-unit-test --bin-output-dir=bin --obj-output-dir=o
+--forgefiles=Forgefile.hsl --Forgefile-projects=websybil-unit-test --bin-output-dir=bin --obj-output-dir=o --ldflags=-lm
 

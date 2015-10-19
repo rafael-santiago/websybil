@@ -15,8 +15,7 @@ var ldflags type list;
 
 project websybil-unit-test : toolset "gcc-c-app" : $srcs, $incs, $cflags, $libs, $ldflags, "websybil-unit";
 
-function get_websybil_objs() : result type list {
-    var retval type list;
+function get_websybil_objs(retval type list) : result type list {
     var oldcwd type string;
     $oldcwd = hefesto.sys.pwd();
     hefesto.sys.cd("../o/");
@@ -40,10 +39,10 @@ websybil-unit-test.prologue() {
     $srcs.ls(".*\\.c$");
     $incs.add_item("cutest/src");
     $libs.add_item("cutest/src/lib");
-    $ldflags = get_websybil_objs();
+    $ldflags = hefesto.sys.get_option("ldflags");
+    $ldflags = get_websybil_objs($ldflags);
     $ldflags.add_item("-lcutest");
     $cflags = hefesto.sys.get_option("cflags");
-    $ldflags.add_item("-lm");
     if (hefesto.sys.os_name() == "linux") {
         $ldflags.add_item("-ldl");
     }
