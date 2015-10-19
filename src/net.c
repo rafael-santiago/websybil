@@ -36,7 +36,7 @@ char *get_src_addr_from_pkt(const char *pkt, const int pkt_size) {
     memset(retval, 0, 100);
     switch (((*(pkt + 14)) & 0xf0) >> 4) {
         case 0x4:
-            if (pkt + 15 >= pkt + pkt_size) {
+            if (pkt + 14 + 15 >= pkt + pkt_size) {
                 free(retval);
                 return NULL;
             }
@@ -44,7 +44,7 @@ char *get_src_addr_from_pkt(const char *pkt, const int pkt_size) {
             break;
 
         case 0x6:
-            if (pkt + 27 >= pkt + pkt_size) {
+            if (pkt + 14 + 27 >= pkt + pkt_size) {
                 free(retval);
                 return NULL;
             }
